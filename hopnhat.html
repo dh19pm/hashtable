@@ -1,0 +1,253 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Đồ án bảng băm phương pháp hợp nhất</title>
+</head>
+<style>
+*{
+	-webkit-tap-highlight-color: transparent;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	outline: none;
+}
+body{
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #bbb;
+}
+ul{
+    list-style-position: outside;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+.option{
+	margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #6d0505;
+}
+.option>input{
+	width: 100%;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 3px;
+}
+.option>button{
+	border: 0;
+    width: 90px;
+    height: 24px;
+	color: #fff;
+    background: #ff7979;
+   	cursor: pointer;
+     border-radius: 3px;
+}
+.option>button:hover
+{
+    background: #6d0505;
+}
+.row{
+	position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 400px;
+    text-align: center;
+    padding: 10px;
+    background: #2b2626;
+    border-radius: 4px;
+}
+.row>h2
+{
+	margin: 0;
+    margin-bottom: 10px;
+    color: #fff;
+}
+#show>table
+{
+    width: 100%;
+}
+#show>table th, #show>table td
+{
+	border: 1px solid #fff;
+    display: inline-block;
+    text-align: center;
+    padding: 4px 10px;
+    width: 33.333333333333333333333333333333%;
+}
+#show>table td.active
+{
+    background: #f00;
+    color: #000;
+    font-weight: bold;
+}
+</style>
+<script type="text/javascript">
+class hashTable
+{
+	constructor()
+	{
+		this.mode = 10;
+		this.list = [];
+		this.end = this.mode-1;
+		let arr;
+		for(let i=0; i<this.mode; i++)
+		{
+			arr = [];
+			arr['key'] = null;
+			arr['next'] = -1;
+			this.list[i] = arr;
+		}
+	}
+	isNum(int)
+	{
+		let num = parseInt(int);
+		return isNaN(num) ? false : true;
+	}
+	isEmpty(val)
+	{
+		if(val === '' || val === null || val === undefined)
+			return false;
+		return true;
+	}
+	getIndex(key)
+	{
+		return (key % this.mode);
+	}
+	getIndexEnd()
+	{
+		while(this.list[this.end].key !== null && this.end >= 0)
+		{
+			this.end--;
+			if(this.end < 0)
+				return -1;
+		}
+		return this.end;
+	}
+	insTable(key)
+	{
+		let search = this.indexSearch(key);
+		if(search != -1)
+		{
+			alert('Giá trị đã tồn tại trong bảng băm');
+			return;
+		}
+		let index = this.getIndex(key);
+        while(this.list[index].next !== -1)
+            index = this.list[index].next;
+
+		if(this.list[index].key === null && this.list[index].next === -1)
+		{
+			this.list[index].key = key;
+		}else{
+			let end = this.getIndexEnd();
+			if(end == -1)
+			{
+				alert('Bảng băm đã đầy không thể thêm!');
+			}else{
+				this.list[index].next = end;
+				this.list[end].key = key;
+			}
+		}
+	}
+	indexSearch(key)
+	{
+		for(let i=0; i<this.mode; i++)
+			if(this.list[i]['key'] === key)
+				return i;
+		return -1;
+	}
+	showTable()
+	{
+		let show = document.getElementById('show');
+		let html = '';
+		for(let i=0; i<this.mode; i++)
+		{
+			html += `<tr><td>${i}</td><td id="${this.list[i].key}">${this.list[i].key}</td><td>${this.list[i].next}</td></tr>`;
+		}
+		let table = `<table><tr><th>index</th><th>key</th><th>next</th></tr>${html}</table>`;
+		show.innerHTML = table;
+		console.log(this.list);
+	}
+	resetTable()
+	{
+		let arr;
+		for(let i=0; i<this.mode; i++)
+		{
+			arr = [];
+			arr['key'] = null;
+			arr['next'] = -1;
+			this.list[i] = arr;
+		}
+		this.showTable();
+	}
+};
+window.onload = () => 
+{
+	const siben = new hashTable(),
+	btAdd = document.getElementById('add'),
+	btSearch = document.getElementById('search'),
+	btReset = document.getElementById('reset'),
+	val = document.getElementById('number');
+	siben.showTable();
+	btAdd.onclick = () =>
+	{
+		if(!siben.isEmpty(val.value))
+		{
+			alert('Vui lòng không để trống giá trị nhập vào bảng băm!');
+		}else{
+			siben.insTable(val.value);
+			val.value = '';
+			siben.showTable();
+		}
+	};
+	/* thực thi nhập giá trị khi nhấn ENTER */
+	val.onkeypress = (event) =>
+    {
+        if(event.which == 13 || event.keyCode == 13)
+        {
+			if(!siben.isEmpty(val.value))
+			{
+				alert('Vui lòng không để trống giá trị nhập vào bảng băm!');
+			}else{
+				siben.insTable(val.value);
+				val.value = '';
+				siben.showTable();
+			}
+        }
+    };
+    btSearch.onclick = () =>
+    {
+    	let search = siben.indexSearch(val.value);
+    	if(search === -1)
+    	{
+    		alert('Giá trị ' + val.value + ' không tồn tại trong bảng băm!');
+    	}else{
+   			console.log('giá trị ' + val.value + ' nằm ở vị trí ' + search);
+	    	let check = document.getElementById(search);
+	    	check.classList.add('active');
+    	}
+    }
+    btReset.onclick = () =>
+    {
+    	siben.resetTable();
+    }
+};
+</script>
+<body>
+<div class="row">
+	<h2>Bảng Băm PP Hợp Nhất</h2>
+	<div class="option">
+		<input type="number" id="number" placeholder="Nhập giá trị cho bảng băm"/>
+		<button id="add">Add</button>
+		<button id="search">Search</button>
+		<button id="reset">Reset</button>
+	</div>
+	<div id="show"></div>
+</div>
+</body>
+</html>

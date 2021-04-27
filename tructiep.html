@@ -1,0 +1,235 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Đồ án bảng băm phương pháp trực tiếp</title>
+</head>
+<style>
+*{
+	-webkit-tap-highlight-color: transparent;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	outline: none;
+}
+body{
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #bbb;
+}
+ul{
+    list-style-position: outside;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+.option{
+	margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #6d0505;
+}
+.option>input{
+	width: 100%;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 3px;
+}
+.option>button{
+	border: 0;
+    width: 90px;
+    height: 24px;
+	color: #fff;
+    background: #ff7979;
+   	cursor: pointer;
+     border-radius: 3px;
+}
+.option>button:hover
+{
+    background: #6d0505;
+}
+.row{
+	position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 400px;
+    text-align: center;
+    padding: 10px;
+    background: #2b2626;
+    border-radius: 4px;
+}
+.row>h2
+{
+	margin: 0;
+    margin-bottom: 10px;
+    color: #fff;
+}
+#show>ul
+{
+	display: flex;
+}
+#show>ul>li
+{
+	display: inline-block;
+    background: #2f2f2f;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    font-size: 12px;
+    margin: 1px;
+    color: #fff;
+    border-radius: 3px;
+}
+#show>ul>li.active
+{
+    background: #41388c;
+}
+#show>ul>li.index
+{
+    background: #6d0505;
+}
+</style>
+<script type="text/javascript">
+class hashTable
+{
+	constructor()
+	{
+		this.mode = 10;
+		this.list = [];
+		for(let i=0; i<this.mode; i++)
+			this.list[i] = null;
+	}
+	isNum(int)
+	{
+		let num = parseInt(int);
+		return isNaN(num) ? false : true;
+	}
+	getIndex(key)
+	{
+		return (key % this.mode);
+	}
+	insTable(key)
+	{
+		if(!this.isNum(key) || key > 100)
+		{
+			alert('Vui lòng nhập giá trị là số và không để rỗng!');
+			return;
+		}
+		let search = this.indexSearch(key);
+		if(search.i !== -1 && search.j !== -1)
+		{
+			alert('Giá trị ' + key + ' đã tồn tại trên bảng băm!');
+			return;
+		}
+		let index = this.getIndex(key);
+		if(!this.list[index])
+		{
+			this.list[index] = [key];
+		}else{
+			this.list[index].push(key);
+			this.list[index].sort((a, b) => {return a - b});
+		}
+	}
+	resetTable()
+	{
+		for(let i=0; i<this.mode; i++)
+			this.list[i] = null;
+	}
+	indexSearch(key)
+	{
+		let arr = [];
+		for(let i=0; i<this.mode; i++)
+		{
+			if(this.list[i] !== null)
+			{
+				for(let j=0; j<this.list[i].length; j++)
+				{
+					if(this.list[i][j] === key)
+					{
+						arr['i'] = i;
+						arr['j'] = j;
+						return arr;
+					}
+				}
+			}
+		}
+		arr['i'] = -1;
+		arr['j'] = -1;
+		return arr;
+	}
+	showTable()
+	{
+		const show = document.getElementById('show');
+		show.innerHTML = '';
+		for(let i=0; i<this.mode; i++)
+		{
+			if(this.list[i] !== null)
+			{
+				let html = '';
+				for(let j=0; j<this.list[i].length; j++)
+					html += '<li id="' + this.list[i][j] + '">' + this.list[i][j] + '</li>';
+				show.innerHTML += '<ul><li class="index">' + i + '</li>' + html + '</ul>';
+			}else{
+				show.innerHTML += '<ul><li class="index">' + i + '</li></ul>';
+			}
+		}
+		console.log(this.list);
+	}
+};
+window.onload = () => 
+{
+	const siben = new hashTable(),
+	btAdd = document.getElementById('add'),
+	btSearch = document.getElementById('search'),
+	btReset = document.getElementById('reset'),
+	val = document.getElementById('number');
+	siben.showTable();
+	btAdd.onclick = () =>
+	{
+		siben.insTable(val.value);
+		val.value = '';
+		siben.showTable();
+	};
+	val.onkeypress = (event) =>
+    {
+        if(event.which == 13 || event.keyCode == 13)
+        {
+			siben.insTable(val.value);
+			val.value = '';
+			siben.showTable();
+        }
+    };
+    btSearch.onclick = () =>
+    {
+    	let search = siben.indexSearch(val.value);
+    	if(search.i === -1 && search.j === -1)
+    		alert('Giá trị ' + val.value + ' không tồn tại trong bảng băm!');
+    	else{
+    		console.log('vị trí số '+val.value+' trong bảng băm là array['+search.i+']['+search.j+']');
+    		document.getElementById(val.value).classList.add('active');
+    	}
+    };
+	btReset.onclick = () =>
+	{
+		siben.resetTable();
+		siben.showTable();
+	};
+};
+</script>
+<body>
+<div class="row">
+	<h2>Bảng Băm PP Trực Tiếp</h2>
+	<div class="option">
+		<input type="number" id="number" placeholder="Nhập giá trị cho bảng băm"/>
+		<button id="add">Add</button>
+		<button id="search">Search</button>
+		<button id="reset">Reset</button>
+	</div>
+	<div id="show"></div>
+</div>
+</body>
+</html>
